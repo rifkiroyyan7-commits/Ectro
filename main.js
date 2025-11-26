@@ -212,3 +212,15 @@ function syncUI() {
   }
   ambilHargaLive();
                           }
+function resetModal() {
+  localStorage.removeItem('ectro_state');
+  state = {
+    modal: 0,
+    sisaModal: 0,
+    portofolio: [],
+  };
+  document.getElementById('input-modal-section').style.display = 'block';
+  document.getElementById('portfolio-section').style.display = 'none';
+  document.getElementById('trade-section').style.display = 'none';
+  updatePortfolioTable();
+}
