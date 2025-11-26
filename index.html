@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ECTRO - Simulator Crypto</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header>
+    <h1>ECTRO</h1>
+    <p>Simulator Crypto Dengan Data Real-time</p>
+  </header>
+  <main>
+    <section id="input-modal-section">
+      <h2>Isi Modal Awal Anda (Maksimal Rp 1.000.000.000)</h2>
+      <input type="number" id="modal-input" max="1000000000" min="0" placeholder="Isi modal (Rp)" />
+      <button onclick="setModal()">Set Modal</button>
+      <div id="modal-alert"></div>
+    </section>
+    <section id="portfolio-section" style="display:none;">
+      <h2>Portofolio Anda</h2>
+      <div id="balance"></div>
+      <table id="portfolio-table">
+        <thead>
+          <tr><th>Koin</th><th>Jumlah</th><th>Harga Sekarang</th><th>Total (Rp)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+    <section id="market-section">
+      <h2>Harga Crypto Saat Ini</h2>
+      <table id="crypto-table">
+        <thead>
+          <tr><th>Koin</th><th>Harga (Rp)</th><th>Aksi</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+    <section id="trade-section" style="display:none;">
+      <h2>Transaksi Simulasi (Beli/Jual)</h2>
+      <select id="trade-coin"></select>
+      <input type="number" id="trade-amount" min="0" step="any" placeholder="Jumlah Koin"/>
+      <select id="trade-type">
+        <option value="buy">Beli</option>
+        <option value="sell">Jual</option>
+      </select>
+      <button onclick="simTrade()">Eksekusi</button>
+      <div id="trade-alert"></div>
+    </section>
+    <section id="chart-section">
+      <h2>Grafik Harga Historis</h2>
+      <select id="chart-coin"></select>
+      <canvas id="crypto-chart" width="600" height="300"></canvas>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="main.js"></script>
+</body>
+    </html>
