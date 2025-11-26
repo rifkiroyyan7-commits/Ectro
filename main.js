@@ -15,13 +15,11 @@ let hargaSekarang = {}; // { symbol: harga dalam rupiah }
 let chartObj = null;
 
 window.onload = () => {
-  // Isi tabel market dan grafik
   isiTableKoin();
   isiPilihanTrade();
   isiPilihanChart();
   ambilHargaLive();
   inisialisasiChart();
-  // load portofolio dari localStorage jika ada
   loadState();
 };
 
@@ -75,6 +73,7 @@ function isiPilihanTrade() {
     sel.appendChild(opt);
   });
 }
+
 // Pilihan chart
 function isiPilihanChart() {
   let sel = document.getElementById("chart-coin");
@@ -204,23 +203,47 @@ function loadState() {
     syncUI();
   }catch{}
 }
+
 // Sinkronisasi tampilan
 function syncUI() {
   if(state.modal > 0){
     document.getElementById('input-modal-section').style.display = 'none';
     updatePortfolioTable();
+  } else {
+    document.getElementById('input-modal-section').style.display = 'block';
+    document.getElementById('portfolio-section').style.display = 'none';
+    document.getElementById('trade-section').style.display = 'none';
+    document.querySelector("#portfolio-table tbody").innerHTML = '';
+    document.getElementById('balance').textContent = '';
   }
   ambilHargaLive();
-                          }
+}
+
+// RESET Fitur: Restart semua seperti awal
 function resetModal() {
+  // Hapus data portofolio di localStorage
   localStorage.removeItem('ectro_state');
+  // Reset state di JS
   state = {
     modal: 0,
     sisaModal: 0,
     portofolio: [],
   };
+  // Tampilkan form input modal awal, sembunyikan portofolio dan trade
   document.getElementById('input-modal-section').style.display = 'block';
   document.getElementById('portfolio-section').style.display = 'none';
   document.getElementById('trade-section').style.display = 'none';
-  updatePortfolioTable();
-}
+  // Bersihkan portofolio table dan balance
+  document.querySelector("#portfolio-table tbody").innerHTML = '';
+  document.getElementById('balance').textContent = '';
+  // Bersihkan input/alert
+  document.getElementById('modal-input').value = '';
+  document.getElementById('modal-alert').textContent = '';
+  document.getElementById('trade-alert').textContent = '';
+  // Reset dropdown grafik ke coin pertama
+  document.getElementById('chart-coin').selectedIndex = 0;
+  // Render ulang grafik dengan default koin
+  renderChartForSelected();
+  // Perbarui harga market
+  ambilHargaLive();
+    }
