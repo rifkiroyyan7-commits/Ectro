@@ -1,4 +1,4 @@
-// Daftar list koin
+// ============ Konfigurasi koin =============
 const COINS = [
   { id: "bitcoin", symbol: "BTC", nama:"Bitcoin" },
   { id: "ethereum", symbol:"ETH", nama:"Ethereum" },
@@ -6,14 +6,17 @@ const COINS = [
   { id: "solana", symbol:"SOL", nama:"Solana" }
 ];
 
+// ============ State utama =============
 let state = {
   modal: 0,
   sisaModal: 0,
   portofolio: [], // {symbol, amount}
 };
-let hargaSekarang = {}; // { symbol: harga dalam rupiah }
+let hargaSekarang = {};        // harga saat ini {symbol: harga}
+let harga1MenitLalu = {};      // harga 1 menit lalu {symbol: harga}
 let chartObj = null;
 
+// ============ Saat halaman selesai load ============
 window.onload = () => {
   isiTableKoin();
   isiPilihanTrade();
@@ -21,13 +24,21 @@ window.onload = () => {
   ambilHargaLive();
   inisialisasiChart();
   loadState();
+
+  // Setiap 1 menit update harga+perubahan, ramah API
+  setInterval(() => {
+    COINS.forEach(c=>{
+      harga1MenitLalu[c.symbol] = hargaSekarang[c.symbol];
+    });
+    ambilHargaLive();
+  }, 60 * 1000);
 };
 
-// MODAL AWAL
+// ============ Modal Awal ============
 function setModal() {
   let nominal = Math.floor(Number(document.getElementById('modal-input').value || 0));
   if(nominal < 1 || nominal > 1_000_000_000) {
-    document.getElementById('modal-alert').textContent="Isi 1-1.000.000.000";
+    document.getElementById('modal-alert').textContent = "Isi 1-1.000.000.000";
     return;
   }
   state.modal = nominal;
@@ -38,7 +49,7 @@ function setModal() {
   document.getElementById('modal-alert').textContent = "Modal disimpan!";
 }
 
-// Ambil harga terkini CoinGecko
+// ============ Harga Crypto Live ============
 function ambilHargaLive() {
   let ids = COINS.map(k=>k.id).join(',');
   fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=idr`)
@@ -46,23 +57,35 @@ function ambilHargaLive() {
       COINS.forEach(k=>{
         hargaSekarang[k.symbol] = d[k.id].idr;
       });
+      // 1x setup harga1MenitLalu (saat awal buka web)
+      COINS.forEach(c=>{
+        if(harga1MenitLalu[c.symbol] === undefined) harga1MenitLalu[c.symbol] = hargaSekarang[c.symbol];
+      });
       updateMarketTable();
       updatePortfolioTable();
     });
 }
 
-// Tabel market
+// ============ Isi tabel market dengan tombol dan perubahan harga ============
 function isiTableKoin() {
   let tbody = document.querySelector("#crypto-table tbody");
   tbody.innerHTML = '';
   COINS.forEach(k => {
     let tr = document.createElement('tr');
-    tr.innerHTML = `<td>${k.symbol}</td><td id="tp_${k.symbol}">-</td><td>&nbsp;</td>`;
+    tr.innerHTML = `
+      <td>${k.symbol}</td>
+      <td id="tp_${k.symbol}">-</td>
+      <td id="chg_${k.symbol}">-</td>
+      <td>
+        <button onclick="isiFormTrade('${k.symbol}','buy')">Beli</button>
+        <button onclick="isiFormTrade('${k.symbol}','sell')">Jual</button>
+      </td>
+    `;
     tbody.appendChild(tr);
   });
 }
 
-// Pilihan trade
+// ============ Pilihan trade di form bawah ============
 function isiPilihanTrade() {
   let sel = document.getElementById("trade-coin");
   sel.innerHTML = '';
@@ -74,7 +97,7 @@ function isiPilihanTrade() {
   });
 }
 
-// Pilihan chart
+// ============ Pilihan grafik ============
 function isiPilihanChart() {
   let sel = document.getElementById("chart-coin");
   sel.innerHTML = '';
@@ -87,15 +110,36 @@ function isiPilihanChart() {
   sel.onchange = renderChartForSelected;
 }
 
-// Update market prices
+// ============ Update tabel market (harga+perubahan+warna) ============
 function updateMarketTable() {
   COINS.forEach(k=>{
+    // Harga sekarang
     let el = document.getElementById(`tp_${k.symbol}`);
     if(el) el.textContent = hargaSekarang[k.symbol]?.toLocaleString('id-ID') || '-';
+    // Perubahan persentase 1 menit
+    let chgCell = document.getElementById(`chg_${k.symbol}`);
+    let prev = harga1MenitLalu[k.symbol];
+    let now = hargaSekarang[k.symbol];
+    if(prev && now){
+      let chg = ((now - prev)/prev)*100;
+      chg = isFinite(chg) ? chg : 0;
+      let color = chg > 0 ? 'limegreen' : (chg < 0 ? 'red' : '#fff');
+      let prefix = chg > 0 ? '+' : '';
+      chgCell.innerHTML = `<span style="color:${color};">${prefix}${chg.toFixed(2)}%</span>`;
+    } else {
+      chgCell.innerHTML = "-";
+    }
   });
 }
 
-// Portofolio
+// ============ Isi form trade otomatis (klik tombol di tabel) ============
+function isiFormTrade(symbol, tipe) {
+  document.getElementById('trade-coin').value = symbol;
+  document.getElementById('trade-type').value = tipe;
+  document.getElementById('trade-amount').focus();
+}
+
+// ============ Update portofolio ============
 function updatePortfolioTable() {
   if(state.modal <= 0) return;
   document.getElementById('portfolio-section').style.display = 'block';
@@ -117,7 +161,7 @@ function updatePortfolioTable() {
   document.getElementById('balance').textContent = `Modal Awal: Rp ${state.modal.toLocaleString('id-ID')}`;
 }
 
-// Simulasi trade
+// ============ Simulasi Trade ============
 function simTrade() {
   let symbol = document.getElementById('trade-coin').value;
   let amount = parseFloat(document.getElementById('trade-amount').value || '0');
@@ -151,7 +195,7 @@ function simTrade() {
   document.getElementById('trade-alert').textContent = 'Transaksi berhasil!';
 }
 
-// Grafik harga historis
+// ============ Grafik harga historis ============
 function inisialisasiChart() {
   const ctx = document.getElementById('crypto-chart').getContext('2d');
   chartObj = new Chart(ctx, {
@@ -191,7 +235,7 @@ function renderChartForSelected() {
     });
 }
 
-// LocalStorage: menyimpan portofolio agar jika refresh tidak hilang
+// ============ LocalStorage data ============
 function saveState() {
   localStorage.setItem('ectro_state', JSON.stringify(state));
 }
@@ -204,7 +248,7 @@ function loadState() {
   }catch{}
 }
 
-// Sinkronisasi tampilan
+// ============ Sinkronisasi UI ============
 function syncUI() {
   if(state.modal > 0){
     document.getElementById('input-modal-section').style.display = 'none';
@@ -219,11 +263,10 @@ function syncUI() {
   ambilHargaLive();
 }
 
-// RESET Fitur: Restart semua seperti awal
+// ============ RESET Modal/Akun ============
 function resetModal() {
-  // Hapus data portofolio di localStorage
+  // Hapus data portofolio di localStorage & JS
   localStorage.removeItem('ectro_state');
-  // Reset state di JS
   state = {
     modal: 0,
     sisaModal: 0,
@@ -244,6 +287,7 @@ function resetModal() {
   document.getElementById('chart-coin').selectedIndex = 0;
   // Render ulang grafik dengan default koin
   renderChartForSelected();
-  // Perbarui harga market
+  // Perbarui harga market (supaya tabel market tetap jalan)
   ambilHargaLive();
-    }
+                }
+      
