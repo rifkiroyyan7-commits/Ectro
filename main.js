@@ -290,4 +290,56 @@ function resetModal() {
   // Perbarui harga market (supaya tabel market tetap jalan)
   ambilHargaLive();
                 }
+
+// --- AUTO TRADING BTC --- //
+let autoBTC = false;             // status tombol otomatis
+let lastBuyPrice = null;         // harga terakhir saat beli otomatis
+
+// fungsi cek auto trading, dipanggil tiap update harga
+function autoTradeBTC(currentPrice) {
+  if (!autoBTC) return;
+
+  // jika belum pernah beli sebelumnya -> tunggu harga turun 0.2%
+  if (lastBuyPrice === null) {
+    // ambil harga awal sebagai basis pertama
+    lastBuyPrice = currentPrice;
+    console.log("Auto Mode Activated - Basis harga awal diset:", lastBuyPrice);
+    return;
+  }
+
+  // hitung perubahan persen
+  const changePercent = ((currentPrice - lastBuyPrice) / lastBuyPrice) * 100;
+
+  // auto buy
+  if (changePercent <= -0.2) {
+    // beli semua sesuai sisa modal
+    console.log("AUTO BUY BTC =", currentPrice);
+    simTradeAuto("BTC", "buy");
+    lastBuyPrice = currentPrice;
+  }
+
+  // auto sell di +0.2% profit
+  if (changePercent >= 0.2) {
+    console.log("AUTO SELL BTC =", currentPrice);
+    simTradeAuto("BTC", "sell");
+    lastBuyPrice = currentPrice;
+  }
+}
+
+// fungsi trading otomatis (beli semua saldo rupiah / jual semua koin)
+function simTradeAuto(coin, type) {
+  if (type === "buy") {
+    let saldo = userBalance; // saldo uang
+    if (saldo <= 0) return;
+    let price = cryptoPrices[coin]; // harga koin sekarang
+    let amount = saldo / price;     // beli semua pakai saldo
+    executeTrade(coin, amount, "buy");
+  } 
+  else if (type === "sell") {
+    let amount = portfolio[coin] || 0;
+    if (amount <= 0) return;
+    executeTrade(coin, amount, "sell");
+  }
+}
       
+
