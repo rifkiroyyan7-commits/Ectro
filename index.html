@@ -21,6 +21,7 @@
       <button onclick="setModal()">Set Modal</button>
       <div id="modal-alert"></div>
     </section>
+
     <section id="portfolio-section" style="display:none;">
       <h2>Portofolio Anda</h2>
       <div id="balance"></div>
@@ -34,20 +35,22 @@
         <tbody></tbody>
       </table>
     </section>
+
     <section id="market-section">
       <h2>Harga Crypto Saat Ini</h2>
       <table id="crypto-table">
-  <thead>
-    <tr>
-      <th>Koin</th>
-      <th>Harga (Rp)</th>
-      <th>Perubahan 1 Menit</th> <!-- tambahkan ini -->
-      <th>Aksi</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
+        <thead>
+          <tr>
+            <th>Koin</th>
+            <th>Harga (Rp)</th>
+            <th>Perubahan 1 Menit</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
       </table>
     </section>
+
     <section id="trade-section" style="display:none;">
       <h2>Transaksi Simulasi (Beli/Jual)</h2>
       <select id="trade-coin"></select>
@@ -58,13 +61,30 @@
       </select>
       <button onclick="simTrade()">Eksekusi</button>
       <div id="trade-alert"></div>
+
+      <!-- 🔥 TOMBOL AUTO BTC DITEMPELKAN DI SINI -->
+      <button id="auto-btc-btn" onclick="toggleAutoBTC()" 
+        style="margin-top:12px; padding:10px 20px; background:orange; color:white; border:none; font-size:16px; border-radius:8px; cursor:pointer;">
+        Auto BTC: OFF
+      </button>
     </section>
+
     <section id="chart-section">
       <h2>Grafik Harga Historis</h2>
       <select id="chart-coin"></select>
       <canvas id="crypto-chart" width="600" height="300"></canvas>
     </section>
+
+    <!-- Tombol Prediksi -->
+    <div style="text-align:center; margin: 30px 0;">
+      <button id="prediksi-btn" onclick="location.href='prediksi.html'"
+        style="padding:15px 30px; font-size:18px; background:#0088ff; color:white; border:none; border-radius:8px; cursor:pointer;">
+        Prediksi
+      </button>
+    </div>
+
   </main>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="main.js"></script>
 </body>
